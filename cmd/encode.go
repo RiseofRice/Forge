@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/forgecli/forgecli/internal/transform"
 	"github.com/spf13/cobra"
 )
 
@@ -12,7 +11,9 @@ var encodeCmd = &cobra.Command{
 	Use:   "encode <encoding> [file...]",
 	Short: "Encode data with the specified encoding",
 	Long: `Encode data using the specified encoding. Supported encodings:
-  base64, base64url, hex, url, gzip, zlib`,
+  base64, base64url, base32, hex, url, gzip, zlib, rot13, html
+
+Plugin-registered encoders are also available.`,
 	Args: cobra.MinimumNArgs(1),
 	RunE: runEncode,
 }
@@ -31,10 +32,9 @@ func runEncode(cmd *cobra.Command, args []string) error {
 	}
 
 	for name, data := range inputs {
-		encoded, err := transform.Encode(encoding, data)
+		encoded, err := pluginEncode(encoding, data)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "encode error (%s) for %s: %v\n", encoding, name, err)
-			os.Exit(1)
+			return fmt.Errorf("encode error (%s) for %s: %w", encoding, name, err)
 		}
 		os.Stdout.Write(encoded)
 	}

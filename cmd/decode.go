@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/forgecli/forgecli/internal/transform"
 	"github.com/spf13/cobra"
 )
 
@@ -12,7 +11,9 @@ var decodeCmd = &cobra.Command{
 	Use:   "decode <encoding> [file...]",
 	Short: "Decode data with the specified encoding",
 	Long: `Decode data using the specified encoding. Supported encodings:
-  base64, hex, url, gzip, zlib, jwt`,
+  base64, base32, hex, url, gzip, zlib, jwt, rot13, html
+
+Plugin-registered decoders are also available.`,
 	Args: cobra.MinimumNArgs(1),
 	RunE: runDecode,
 }
@@ -31,10 +32,9 @@ func runDecode(cmd *cobra.Command, args []string) error {
 	}
 
 	for name, data := range inputs {
-		decoded, err := transform.Decode(encoding, data)
+		decoded, err := pluginDecode(encoding, data)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "decode error (%s) for %s: %v\n", encoding, name, err)
-			os.Exit(1)
+			return fmt.Errorf("decode error (%s) for %s: %w", encoding, name, err)
 		}
 		os.Stdout.Write(decoded)
 	}

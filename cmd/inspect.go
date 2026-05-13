@@ -21,16 +21,16 @@ func init() {
 }
 
 type inspectReport struct {
-	Source       string             `json:"source"`
-	Size         int                `json:"size_bytes"`
-	MagicBytes   string             `json:"magic_bytes"`
-	Entropy      float64            `json:"entropy"`
-	Interpretation string           `json:"entropy_interpretation"`
-	Detections   []detection.Result `json:"detections"`
+	Source         string             `json:"source"`
+	Size           int                `json:"size_bytes"`
+	MagicBytes     string             `json:"magic_bytes"`
+	Entropy        float64            `json:"entropy"`
+	Interpretation string             `json:"entropy_interpretation"`
+	Detections     []detection.Result `json:"detections"`
 }
 
 func runInspect(cmd *cobra.Command, args []string) error {
-	reg := detection.DefaultRegistry()
+	reg := buildRegistry()
 
 	inputs, err := readInputs(args)
 	if err != nil {
@@ -67,14 +67,37 @@ func runInspect(cmd *cobra.Command, args []string) error {
 			b, _ := json.MarshalIndent(report, "", "  ")
 			fmt.Println(string(b))
 		} else {
-			fmt.Printf("Source      : %s\n", report.Source)
-			fmt.Printf("Size        : %d bytes\n", report.Size)
-			fmt.Printf("Magic bytes : %s\n", report.MagicBytes)
-			fmt.Printf("Entropy     : %.4f (%s)\n", report.Entropy, report.Interpretation)
-			fmt.Println("Detections  :")
-			for _, r := range report.Detections {
-				fmt.Printf("  %-20s %.2f  %s\n", r.Name, r.Confidence, r.Details)
+			fmt.Println(separator(50))
+			fmt.Printf(" %s  %s\n", bold("Source     :"), cyan(report.Source))
+			fmt.Printf(" %s  %s\n", bold("Size       :"), fmt.Sprintf("%d bytes", report.Size))
+			fmt.Printf(" %s  %s\n", bold("Magic bytes:"), yellow(report.MagicBytes))
+
+			entropyStr := fmt.Sprintf("%.4f / 8.0", report.Entropy)
+			entropyColored := entropyStr
+			switch {
+			case report.Entropy >= 7.0:
+				entropyColored = red(entropyStr)
+			case report.Entropy >= 5.0:
+				entropyColored = yellow(entropyStr)
+			default:
+				entropyColored = green(entropyStr)
 			}
+			fmt.Printf(" %s  %s  %s\n", bold("Entropy    :"), entropyColored, dim("("+report.Interpretation+")"))
+			fmt.Println(separator(50))
+
+			if len(report.Detections) == 0 {
+				fmt.Printf(" %s\n", dim("No encodings detected."))
+			} else {
+				fmt.Printf(" %s\n", bold("Detections :"))
+				for _, r := range report.Detections {
+					fmt.Printf("   %-16s %s  %s\n",
+						bold(r.Name),
+						confidenceBar(r.Confidence),
+						r.Details,
+					)
+				}
+			}
+			fmt.Println(separator(50))
 			fmt.Println()
 		}
 	}

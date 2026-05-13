@@ -93,8 +93,7 @@ func runRecipe(cmd *cobra.Command, args []string) error {
 	for name, data := range inputs {
 		result, err := applyRecipe(recipe, data)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "recipe error for %s: %v\n", name, err)
-			os.Exit(1)
+			return fmt.Errorf("recipe error for %s: %w", name, err)
 		}
 		os.Stdout.Write(result)
 	}
@@ -137,8 +136,7 @@ func runRecipeRun(cmd *cobra.Command, args []string) error {
 	for name, data := range inputs {
 		result, err := applyRecipe(*recipe, data)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "recipe error for %s: %v\n", name, err)
-			os.Exit(1)
+			return fmt.Errorf("recipe error for %s: %w", name, err)
 		}
 		os.Stdout.Write(result)
 	}

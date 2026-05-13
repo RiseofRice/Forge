@@ -3,7 +3,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/forgecli/forgecli/pkg/plugin"
 	"github.com/spf13/cobra"
@@ -52,16 +51,27 @@ func runPluginsList(cmd *cobra.Command, args []string) error {
 		}
 		b, _ := json.MarshalIndent(out, "", "  ")
 		fmt.Println(string(b))
-	} else {
-		if len(plugins) == 0 {
-			fmt.Println("No plugins loaded.")
-			return nil
-		}
-		fmt.Println("Loaded plugins:")
-		for _, p := range plugins {
-			fmt.Printf("  %-20s v%s\n", p.Name(), p.Version())
-		}
+		return nil
 	}
+
+	if len(plugins) == 0 {
+		fmt.Println(dim("No plugins loaded."))
+		return nil
+	}
+
+	detectors := pluginManager.Detectors()
+	decoders := pluginManager.Decoders()
+	encoders := pluginManager.Encoders()
+
+	fmt.Printf("%s\n", bold("Loaded plugins:"))
+	for _, p := range plugins {
+		fmt.Printf("  %-20s %s\n", bold(p.Name()), cyan("v"+p.Version()))
+	}
+	fmt.Println()
+	fmt.Printf("  Detectors : %d registered\n", len(detectors))
+	fmt.Printf("  Decoders  : %d registered\n", len(decoders))
+	fmt.Printf("  Encoders  : %d registered\n", len(encoders))
+
 	return nil
 }
 
@@ -79,13 +89,11 @@ func runPluginsInfo(cmd *cobra.Command, args []string) error {
 				b, _ := json.MarshalIndent(out, "", "  ")
 				fmt.Println(string(b))
 			} else {
-				fmt.Printf("Name   : %s\n", p.Name())
-				fmt.Printf("Version: %s\n", p.Version())
+				fmt.Printf("%s  %s\n", bold("Name   :"), p.Name())
+				fmt.Printf("%s  %s\n", bold("Version:"), p.Version())
 			}
 			return nil
 		}
 	}
-	fmt.Fprintf(os.Stderr, "plugin not found: %s\n", name)
-	os.Exit(1)
-	return nil
+	return fmt.Errorf("plugin not found: %s", name)
 }

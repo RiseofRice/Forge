@@ -25,12 +25,12 @@ var detectCmd = &cobra.Command{
 
 func init() {
 	detectCmd.Flags().IntVar(&detectDepth, "depth", 3, "Recursion depth for nested encoding detection")
-	detectCmd.Flags().BoolVar(&detectAll, "all", false, "Show all detectors, not just matches")
+	detectCmd.Flags().BoolVar(&detectAll, "all", false, "Show all detectors, including zero-confidence results")
 	rootCmd.AddCommand(detectCmd)
 }
 
 func runDetect(cmd *cobra.Command, args []string) error {
-	reg := detection.DefaultRegistry()
+	reg := buildRegistry()
 
 	inputs, err := readInputs(args)
 	if err != nil {
@@ -39,7 +39,13 @@ func runDetect(cmd *cobra.Command, args []string) error {
 
 	for name, data := range inputs {
 		log.Debug().Str("source", name).Int("bytes", len(data)).Msg("detecting")
-		results := reg.DetectAllParallel(data)
+
+		var results []detection.Result
+		if detectAll {
+			results = reg.DetectAllFull(data)
+		} else {
+			results = reg.DetectAllParallel(data)
+		}
 
 		if outputFmt == "json" {
 			type jsonResult struct {
@@ -50,15 +56,34 @@ func runDetect(cmd *cobra.Command, args []string) error {
 			b, _ := json.MarshalIndent(out, "", "  ")
 			fmt.Println(string(b))
 		} else {
-			fmt.Printf("Source: %s\n", name)
+			matches := 0
+			for _, r := range results {
+				if r.Confidence > 0 {
+					matches++
+				}
+			}
+			fmt.Printf("%s  %s\n", header("Source:"), cyan(name))
+			fmt.Printf("%s  %d bytes", header("Size:"), len(data))
+			if matches > 0 {
+				fmt.Printf("  %s\n", green(fmt.Sprintf("(%d match(es))", matches)))
+			} else {
+				fmt.Printf("  %s\n", dim("(no matches)"))
+			}
+			fmt.Println(separator(50))
+
 			if len(results) == 0 {
-				fmt.Println("  No encodings detected.")
+				fmt.Printf("  %s\n", dim("No encodings detected."))
 			}
 			for _, r := range results {
-				if !detectAll && r.Confidence == 0 {
-					continue
+				details := r.Details
+				if details == "" {
+					details = dim("—")
 				}
-				fmt.Printf("  %-20s confidence=%.2f  %s\n", r.Name, r.Confidence, r.Details)
+				fmt.Printf("  %-16s %s  %s\n",
+					bold(r.Name),
+					confidenceBar(r.Confidence),
+					details,
+				)
 			}
 			fmt.Println()
 		}

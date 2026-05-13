@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/forgecli/forgecli/internal/detection"
-	"github.com/forgecli/forgecli/internal/transform"
 	"github.com/spf13/cobra"
 )
 
@@ -30,7 +29,7 @@ type treeNode struct {
 }
 
 func runAuto(cmd *cobra.Command, args []string) error {
-	reg := detection.DefaultRegistry()
+	reg := buildRegistry()
 
 	inputs, err := readInputs(args)
 	if err != nil {
@@ -38,9 +37,9 @@ func runAuto(cmd *cobra.Command, args []string) error {
 	}
 
 	for name, data := range inputs {
-		fmt.Printf("Source: %s\n", name)
+		fmt.Printf("%s %s %s\n", header("auto:"), cyan(name), dim(fmt.Sprintf("(%d bytes)", len(data))))
 		node := buildTree(reg, data, autoMaxDepth, 0)
-		printTree(node, 0)
+		printTreeRoot(node)
 		fmt.Println()
 	}
 	return nil
@@ -57,7 +56,7 @@ func buildTree(reg *detection.Registry, data []byte, maxDepth, depth int) *treeN
 		if r.Confidence < 0.5 {
 			continue
 		}
-		decoded, err := transform.Decode(r.Name, data)
+		decoded, err := pluginDecode(r.Name, data)
 		if err != nil {
 			continue
 		}
@@ -72,12 +71,28 @@ func buildTree(reg *detection.Registry, data []byte, maxDepth, depth int) *treeN
 	return node
 }
 
-func printTree(node *treeNode, depth int) {
-	indent := strings.Repeat("  ", depth)
-	preview := previewBytes(node.data, 64)
-	fmt.Printf("%s[%s] %s\n", indent, node.encoding, preview)
-	for _, child := range node.children {
-		printTree(child, depth+1)
+func printTreeRoot(node *treeNode) {
+	preview := previewBytes(node.data, 60)
+	fmt.Printf("  %s  %s\n", bold("["+node.encoding+"]"), dim(preview))
+	for i, child := range node.children {
+		printTree(child, "  ", i == len(node.children)-1)
+	}
+}
+
+func printTree(node *treeNode, prefix string, isLast bool) {
+	connector := "├─ "
+	childPrefix := prefix + "│  "
+	if isLast {
+		connector = "└─ "
+		childPrefix = prefix + "   "
+	}
+
+	preview := previewBytes(node.data, 60)
+	label := bold("[" + node.encoding + "]")
+	fmt.Printf("%s%s%s  %s\n", prefix, connector, label, dim(preview))
+
+	for i, child := range node.children {
+		printTree(child, childPrefix, i == len(node.children)-1)
 	}
 }
 
@@ -86,7 +101,6 @@ func previewBytes(data []byte, maxLen int) string {
 	if len(s) > maxLen {
 		s = s[:maxLen] + "..."
 	}
-	// Replace non-printable chars
 	var b strings.Builder
 	for _, r := range s {
 		if r < 32 || r > 126 {

@@ -36,6 +36,8 @@ func Decode(encoding string, data []byte) ([]byte, error) {
 		return DecodeROT13(data), nil
 	case "html":
 		return DecodeHTML(data), nil
+	case "xor":
+		return DecodeXOR(data), nil
 	default:
 		return nil, fmt.Errorf("unknown encoding: %s", encoding)
 	}
@@ -162,4 +164,42 @@ func DecodeROT13(data []byte) []byte {
 // DecodeHTML unescapes HTML entities (&amp; &lt; &#123; etc.).
 func DecodeHTML(data []byte) []byte {
 	return []byte(html.UnescapeString(string(data)))
+}
+
+// DecodeXOR applies single-byte XOR decoding using the key found by frequency analysis.
+func DecodeXOR(data []byte) []byte {
+	key := findBestXORKey(data)
+	out := make([]byte, len(data))
+	for i, b := range data {
+		out[i] = b ^ key
+	}
+	return out
+}
+
+var xorExpectedFreq = map[byte]float64{
+	' ': 0.130, 'e': 0.102, 't': 0.075, 'a': 0.071, 'o': 0.068,
+	'i': 0.063, 'n': 0.061, 's': 0.058, 'h': 0.058, 'r': 0.049,
+	'd': 0.043, 'l': 0.035, 'u': 0.027, 'm': 0.024, 'w': 0.023,
+	'c': 0.022, 'f': 0.020, 'g': 0.019, 'y': 0.018, 'p': 0.018,
+}
+
+func findBestXORKey(data []byte) byte {
+	var bestKey byte
+	bestScore := 0.0
+	for k := 0; k < 256; k++ {
+		freq := make(map[byte]int)
+		for _, b := range data {
+			freq[b^byte(k)]++
+		}
+		score := 0.0
+		n := float64(len(data))
+		for ch, weight := range xorExpectedFreq {
+			score += (float64(freq[ch]) / n) * weight
+		}
+		if score > bestScore {
+			bestScore = score
+			bestKey = byte(k)
+		}
+	}
+	return bestKey
 }

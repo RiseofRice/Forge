@@ -18,18 +18,28 @@ var expectedFreq = map[byte]float64{
 	'c': 0.022, 'f': 0.020, 'g': 0.019, 'y': 0.018, 'p': 0.018,
 }
 
+// xorRandomBaseline is the expected score for uniformly random data (~1/256 per char * sum of weights).
+const xorRandomBaseline = 0.0038
+
+// xorMaxScore is the theoretical maximum score achievable with a perfect English distribution
+// (sum of weight_i^2 for all expected chars).
+const xorMaxScore = 0.0661
+
 func (d *XORDetector) Detect(data []byte) Result {
 	if len(data) < 8 {
 		return Result{Name: d.Name(), Confidence: 0}
 	}
 
 	bestKey, bestScore := findBestXORKey(data)
-	if bestScore < 0.1 {
+	if bestScore < 0.03 {
 		return Result{Name: d.Name(), Confidence: 0}
 	}
 
-	// Normalise score to [0, 1]
-	confidence := math.Min(bestScore, 1.0)
+	// Normalise against the realistic [baseline, max] range so confidence reaches ~1.0 for English text.
+	confidence := math.Min((bestScore-xorRandomBaseline)/(xorMaxScore-xorRandomBaseline), 1.0)
+	if confidence < 0 {
+		confidence = 0
+	}
 
 	return Result{
 		Name:       d.Name(),

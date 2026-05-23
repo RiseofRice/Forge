@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/forgecli/forgecli/internal/detection"
+	"github.com/RiseofRice/Forge/internal/detection"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -53,7 +53,10 @@ func runDetect(cmd *cobra.Command, args []string) error {
 				Results []detection.Result `json:"results"`
 			}
 			out := jsonResult{Source: name, Results: results}
-			b, _ := json.MarshalIndent(out, "", "  ")
+			b, err := json.MarshalIndent(out, "", "  ")
+			if err != nil {
+				return fmt.Errorf("marshaling JSON: %w", err)
+			}
 			fmt.Println(string(b))
 		} else {
 			matches := 0

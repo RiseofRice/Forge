@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/forgecli/forgecli/internal/analysis"
+	"github.com/RiseofRice/Forge/internal/analysis"
 	"github.com/spf13/cobra"
 )
 
@@ -42,7 +42,10 @@ func runHash(cmd *cobra.Command, args []string) error {
 					Hashes []analysis.HashResult `json:"hashes"`
 				}
 				out := jsonOut{Source: name, Hashes: results}
-				b, _ := json.MarshalIndent(out, "", "  ")
+				b, err := json.MarshalIndent(out, "", "  ")
+				if err != nil {
+					return fmt.Errorf("marshaling JSON: %w", err)
+				}
 				fmt.Println(string(b))
 			} else {
 				fmt.Printf("Source: %s\n", name)
@@ -64,7 +67,10 @@ func runHash(cmd *cobra.Command, args []string) error {
 					Hash      string `json:"hash"`
 				}
 				out := jsonOut{Source: name, Algorithm: result.Algorithm, Hash: result.Hex}
-				b, _ := json.MarshalIndent(out, "", "  ")
+				b, err := json.MarshalIndent(out, "", "  ")
+				if err != nil {
+					return fmt.Errorf("marshaling JSON: %w", err)
+				}
 				fmt.Println(string(b))
 			} else {
 				fmt.Printf("%s  %s\n", result.Hex, name)

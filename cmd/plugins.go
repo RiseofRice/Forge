@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/forgecli/forgecli/pkg/plugin"
+	"github.com/RiseofRice/Forge/internal/plugin"
 	"github.com/spf13/cobra"
 )
 
@@ -49,7 +49,10 @@ func runPluginsList(cmd *cobra.Command, args []string) error {
 		for i, p := range plugins {
 			out[i] = pInfo{Name: p.Name(), Version: p.Version()}
 		}
-		b, _ := json.MarshalIndent(out, "", "  ")
+		b, err := json.MarshalIndent(out, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshaling JSON: %w", err)
+		}
 		fmt.Println(string(b))
 		return nil
 	}
@@ -86,7 +89,10 @@ func runPluginsInfo(cmd *cobra.Command, args []string) error {
 					Version string `json:"version"`
 				}
 				out := pInfo{Name: p.Name(), Version: p.Version()}
-				b, _ := json.MarshalIndent(out, "", "  ")
+				b, err := json.MarshalIndent(out, "", "  ")
+				if err != nil {
+					return fmt.Errorf("marshaling JSON: %w", err)
+				}
 				fmt.Println(string(b))
 			} else {
 				fmt.Printf("%s  %s\n", bold("Name   :"), p.Name())

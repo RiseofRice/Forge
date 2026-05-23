@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/forgecli/forgecli/internal/analysis"
-	"github.com/forgecli/forgecli/internal/detection"
+	"github.com/RiseofRice/Forge/internal/analysis"
+	"github.com/RiseofRice/Forge/internal/detection"
 	"github.com/spf13/cobra"
 )
 
@@ -64,7 +64,10 @@ func runInspect(cmd *cobra.Command, args []string) error {
 		}
 
 		if outputFmt == "json" {
-			b, _ := json.MarshalIndent(report, "", "  ")
+			b, err := json.MarshalIndent(report, "", "  ")
+			if err != nil {
+				return fmt.Errorf("marshaling JSON: %w", err)
+			}
 			fmt.Println(string(b))
 		} else {
 			fmt.Println(separator(50))
@@ -73,7 +76,7 @@ func runInspect(cmd *cobra.Command, args []string) error {
 			fmt.Printf(" %s  %s\n", bold("Magic bytes:"), yellow(report.MagicBytes))
 
 			entropyStr := fmt.Sprintf("%.4f / 8.0", report.Entropy)
-			entropyColored := entropyStr
+			var entropyColored string
 			switch {
 			case report.Entropy >= 7.0:
 				entropyColored = red(entropyStr)

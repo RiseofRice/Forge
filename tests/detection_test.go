@@ -8,9 +8,9 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/forgecli/forgecli/internal/analysis"
-	"github.com/forgecli/forgecli/internal/detection"
-	"github.com/forgecli/forgecli/internal/transform"
+	"github.com/RiseofRice/Forge/internal/analysis"
+	"github.com/RiseofRice/Forge/internal/detection"
+	"github.com/RiseofRice/Forge/internal/transform"
 )
 
 // ---- Base64 detection ----
@@ -78,7 +78,9 @@ func TestGzipDetection_Valid(t *testing.T) {
 	d := &detection.GzipDetector{}
 	var buf bytes.Buffer
 	w := gzip.NewWriter(&buf)
-	w.Write([]byte("hello gzip world"))
+	if _, err := w.Write([]byte("hello gzip world")); err != nil {
+		t.Fatalf("gzip write error: %v", err)
+	}
 	w.Close()
 	result := d.Detect(buf.Bytes())
 	if result.Confidence < 0.9 {

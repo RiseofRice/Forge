@@ -3,8 +3,8 @@ package cmd
 import (
 	"strings"
 
-	"github.com/forgecli/forgecli/internal/detection"
-	"github.com/forgecli/forgecli/internal/transform"
+	"github.com/RiseofRice/Forge/internal/detection"
+	"github.com/RiseofRice/Forge/internal/transform"
 )
 
 // buildRegistry returns a detection Registry with built-in detectors plus

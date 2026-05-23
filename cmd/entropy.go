@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/forgecli/forgecli/internal/analysis"
+	"github.com/RiseofRice/Forge/internal/analysis"
 	"github.com/spf13/cobra"
 )
 
@@ -51,7 +51,10 @@ func runEntropy(cmd *cobra.Command, args []string) error {
 				Interpretation: interp,
 				Blocks:         blocks,
 			}
-			b, _ := json.MarshalIndent(out, "", "  ")
+			b, err := json.MarshalIndent(out, "", "  ")
+			if err != nil {
+				return fmt.Errorf("marshaling JSON: %w", err)
+			}
 			fmt.Println(string(b))
 		} else {
 			fmt.Printf("Source : %s\n", name)

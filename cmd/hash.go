@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/forgecli/forgecli/internal/analysis"
+	"github.com/RiseofRice/Forge/internal/analysis"
 	"github.com/spf13/cobra"
 )
 

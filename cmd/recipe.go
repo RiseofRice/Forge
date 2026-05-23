@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/forgecli/forgecli/internal/transform"
+	"github.com/RiseofRice/Forge/internal/transform"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )

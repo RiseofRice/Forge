@@ -1,6 +1,6 @@
 package main
 
-import "github.com/forgecli/forgecli/cmd"
+import "github.com/RiseofRice/Forge/cmd"
 
 func main() {
 	cmd.Execute()

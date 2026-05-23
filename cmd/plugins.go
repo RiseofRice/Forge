@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/forgecli/forgecli/pkg/plugin"
+	"github.com/RiseofRice/Forge/internal/plugin"
 	"github.com/spf13/cobra"
 )
 

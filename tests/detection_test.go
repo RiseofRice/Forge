@@ -8,9 +8,9 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/forgecli/forgecli/internal/analysis"
-	"github.com/forgecli/forgecli/internal/detection"
-	"github.com/forgecli/forgecli/internal/transform"
+	"github.com/RiseofRice/Forge/internal/analysis"
+	"github.com/RiseofRice/Forge/internal/detection"
+	"github.com/RiseofRice/Forge/internal/transform"
 )
 
 // ---- Base64 detection ----

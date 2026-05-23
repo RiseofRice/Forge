@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/forgecli/forgecli/internal/detection"
+	"github.com/RiseofRice/Forge/internal/detection"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )

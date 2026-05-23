@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/forgecli/forgecli/internal/analysis"
-	"github.com/forgecli/forgecli/internal/detection"
+	"github.com/RiseofRice/Forge/internal/analysis"
+	"github.com/RiseofRice/Forge/internal/detection"
 	"github.com/spf13/cobra"
 )
 

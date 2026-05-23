@@ -1,4 +1,4 @@
-module github.com/forgecli/forgecli
+module github.com/RiseofRice/Forge
 
 go 1.24
 

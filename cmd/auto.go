@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/forgecli/forgecli/internal/detection"
+	"github.com/RiseofRice/Forge/internal/detection"
 	"github.com/spf13/cobra"
 )
 

@@ -4,8 +4,8 @@ import (
 	"crypto/rand"
 	"testing"
 
-	"github.com/forgecli/forgecli/internal/analysis"
-	"github.com/forgecli/forgecli/internal/detection"
+	"github.com/RiseofRice/Forge/internal/analysis"
+	"github.com/RiseofRice/Forge/internal/detection"
 )
 
 func randomBytes(n int) []byte {

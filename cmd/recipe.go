@@ -102,7 +102,10 @@ func runRecipe(cmd *cobra.Command, args []string) error {
 
 func runRecipeList(cmd *cobra.Command, args []string) error {
 	if outputFmt == "json" {
-		b, _ := json.MarshalIndent(builtinRecipes, "", "  ")
+		b, err := json.MarshalIndent(builtinRecipes, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshaling JSON: %w", err)
+		}
 		fmt.Println(string(b))
 	} else {
 		fmt.Println("Built-in recipes:")
